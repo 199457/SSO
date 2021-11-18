@@ -1,8 +1,11 @@
 package com.wei.ssoclient2.controller;
 
+import cn.dev33.satoken.config.SaTokenConfig;
 import cn.dev33.satoken.sso.SaSsoHandle;
+import cn.dev33.satoken.sso.SaSsoUtil;
 import cn.dev33.satoken.stp.StpUtil;
-import org.springframework.web.bind.annotation.GetMapping;
+import com.ejlchina.okhttps.OkHttps;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,9 +35,20 @@ public class SsoClientController {
         return SaSsoHandle.clientRequest();
     }
 
-    @GetMapping("/test01")
-    public void test01() {
-        System.out.println("登录的Id: " + StpUtil.getLoginId());
+    // 配置SSO相关参数
+    @Autowired
+    private void configSso(SaTokenConfig cfg) {
+        // 配置Http请求处理器
+        cfg.sso.setSendHttp(url -> OkHttps.sync(url).get().getBody().toString());
     }
+
+    // 查询我的账号信息
+    @RequestMapping("/sso/myinfo")
+    public Object myinfo() {
+        Object userinfo = SaSsoUtil.getUserinfo(StpUtil.getLoginId());
+        System.out.println("--------info：" + userinfo);
+        return userinfo;
+    }
+
 
 }
